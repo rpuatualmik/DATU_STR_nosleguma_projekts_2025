@@ -1,0 +1,1 @@
+# DATU_STR_nosleguma_projekts_2025
