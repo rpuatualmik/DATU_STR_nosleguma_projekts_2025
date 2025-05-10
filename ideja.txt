@@ -1,0 +1,2 @@
+izvaidot Python kodu, kurā ievadot pilsētas nosaukumu un dienu sakitu, 
+tiek izvadīts apskates objektu saraksts un laika prognoze ievadītajam dienu sakitam sākt no tekošās dienas datuma
