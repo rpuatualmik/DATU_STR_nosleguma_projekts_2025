@@ -46,12 +46,20 @@ if lapa.status_code == 200:
     # print(lapas_saturs.prettify())
     
     ltr = lapas_saturs.find("div", dir="ltr")
-    nos = ltr.find_all("h3")
-    div1 = ltr.find("div", class_="css-eyu4aa")
-    div2 = div1.find("div", class_="css-ngwlx1")
-    div3 = div2.find("div", class_="css-4pdaj4")
-    div5 = div3.find_all("li")
-    # div4 = div5.find("div", id="attr-search-results-page-main-content")
-    # print(f"Found {len(div4)} attraction blocks")
-    print(nos)
+    nos = lapas_saturs.find("body")
+    div1 = nos.find("div", dir = "ltr")
+    div2 = div1.find("div", class_ = "css-eyu4aa")
+    div3 = div2.find("div", class_="css-ngwlx1")
+    div4 = div3.find("div", class_ = "css-4pdaj4")
+    div5 = div4.find("div", class_ = "css-f10ke9")
+    div6 = div5.find("div", class_ = "css-1ie5gar")
+    main = div6.find("main", class_ = "css-zq8daf")
+    div7 = main.find("div", attrs={'data-testid': 'sr-list'})
+
+    print(f"Found {len(div7)} attraction blocks")
+    # print(div5)
+    for item in div7:
+        print("\n\n\n\n")
+
+        print(item)
 
