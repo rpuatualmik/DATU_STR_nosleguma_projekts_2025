@@ -24,6 +24,7 @@ while True:
     saturs = BeautifulSoup(lapa.content, "html.parser")
     nos = saturs.find("body")
     vietas = nos.find_all("h3", class_ = "bl")
+    # adrese = nos.find_all("span", class_="listing_address")
     # print(nos.prettify())
 
 
@@ -32,3 +33,5 @@ while True:
         n = n + 1
     k= k+1
     time.sleep(0.5)
+
+    print(url)

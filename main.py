@@ -3,63 +3,67 @@ import os
 import requests
 from datetime import datetime
 from bs4 import BeautifulSoup
+import time
+from tabulate import tabulate 
 
-
-# city = input("Destination city: ").lower()
-city = "paris" # testa vertibas
-# dienas = int(input("Number of days: "))
-dienas = 5 # testa vertibas
-days = str(dienas)
 
 load_dotenv()
-API_KEY = os.getenv("WEATHER_API_KEY")
+WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")
+
+city = input("Destination city: ").lower()
+num_days = int(input("Number of days: "))
+num_places = int(input("Number of places to visit: "))
 
 
-# url = "http://api.weatherapi.com/v1/forecast.json?key=" + API_KEY + "&q=" + city + "&days=" + days + "&aqi=no&alerts=no"
+print("\n🌦️ Weather Forecast:")
+weather_url = f"http://api.weatherapi.com/v1/forecast.json?key={WEATHER_API_KEY}&q={city}&days={num_days}&aqi=no&alerts=no"
+weather = requests.get(weather_url).json()
 
-# laikapstakli = requests.get(url).json() # iegust laika prognozi
-# for i in range (dienas):
-#     datums = str(laikapstakli['forecast']['forecastday'][i]['date'])
-#     datums = datetime.strptime(datums, "%Y-%m-%d")
-#     datums = datums.strftime("%d.%m.%Y")
-#     print(f"{datums}, max temperature:{laikapstakli['forecast']['forecastday'][i]['day']['maxtemp_c']}\u00b0C, min temperature:{laikapstakli['forecast']['forecastday'][i]['day']['mintemp_c']}\u00b0C, average temperature:{laikapstakli['forecast']['forecastday'][i]['day']['avgtemp_c']}\u00b0C, {(laikapstakli['forecast']['forecastday'][i]['day']['condition']['text']).lower()}")
+weather_data = []
+for i in range(num_days):
+    day = weather['forecast']['forecastday'][i]['day']
+    date = datetime.strptime(weather['forecast']['forecastday'][i]['date'], "%Y-%m-%d")
+    weather_data.append([
+        date.strftime('%d.%m.%Y.'),
+        f"{day['maxtemp_c']}°C",
+        f"{day['mintemp_c']}°C",
+        f"{day['avgtemp_c']}°C",
+        day['condition']['text']
+    ])
 
 
-# with open('countries-codes.csv', 'r',  encoding = "utf-8", errors = 'ignore') as kodi: #iegust atbilstoso valsts kodu
-#     for rinda in kodi:
-#         valsts, kods_ne = rinda.split(';')
-#         if valsts == laikapstakli['location']['country']:
-#             kods = kods_ne.lower()
-#         else:
-#             pass
-#18-34 gatavs kods, vienk nokomentets, lai netere API limitus ar katru testu
+print(tabulate(weather_data, headers=["Date", "Max Temp", "Min Temp", "Avg Temp", "Condition"], tablefmt="grid"))
+print("\n")
 
-# kods = kods + '/' + city
-kods = "fr/paris" # testesanas vertibas
 
-links = "https://www.booking.com/attractions/searchresults/"+ kods +".en.html?adplat=www-index-web_shell_header-attraction-missing_creative-2XJT9BJTHf0ahEqma5wszk&label=gen173nr-1BCAEoggI46AdIM1gEaIoBiAEBmAEauAEXyAEM2AEB6AEBiAIBqAIDuALn2vzABsACAdICJDlmOWRkNjJjLWY2NTItNDQzMS04OGYzLTM3ZmI3YTJlMTljNNgCBeACAQ&distribution_id=2XJT9BJTHf0ahEqma5wszk&aid=304142&client_name=b-web-shell-bff"
+print("\n📌 Gathering sightseeing places...\n")
+n, k = 1, 0
+attractions_data = []
 
-lapa = requests.get(links)
-# print(lapa.status_code)
-if lapa.status_code == 200:
-    lapas_saturs = BeautifulSoup(lapa.content, "html.parser")
-    # print(lapas_saturs.prettify())
-    
-    ltr = lapas_saturs.find("div", dir="ltr")
-    nos = lapas_saturs.find("body")
-    div1 = nos.find("div", dir = "ltr")
-    div2 = div1.find("div", class_ = "css-eyu4aa")
-    div3 = div2.find("div", class_="css-ngwlx1")
-    div4 = div3.find("div", class_ = "css-4pdaj4")
-    div5 = div4.find("div", class_ = "css-f10ke9")
-    div6 = div5.find("div", class_ = "css-1ie5gar")
-    main = div6.find("main", class_ = "css-zq8daf")
-    div7 = main.find("div", attrs={'data-testid': 'sr-list'})
+while n <= num_places:
+    url = f"https://www.inyourpocket.com/{city}/Sightseeing?p={k}"
+    r = requests.get(url)
+    if r.status_code != 200:
+        break
 
-    print(f"Found {len(div7)} attraction blocks")
-    # print(div5)
-    for item in div7:
-        print("\n\n\n\n")
+    lapa = BeautifulSoup(r.content, "html.parser")
+    places = lapa.find_all("h3", class_="bl")
+    addresses = lapa.find_all("span", class_="listing_address")
+    attraction_types = lapa.find_all("div", class_="category cuisine")
 
-        print(item)
+    for name_tag, addr_tag, type_tag in zip(places, addresses, attraction_types):
+        if n > num_places:
+            break
 
+        name = name_tag.get_text(strip=True)
+        address = addr_tag.get_text(strip=True)
+        attraction_type = type_tag.get_text(strip=True) if type_tag else "Unknown" 
+        
+        attractions_data.append([n, name, address, attraction_type])
+        n += 1
+    k += 1
+    time.sleep(0.5)
+
+print(tabulate(attractions_data, headers=["#", "Attraction", "Address", "Attraction Type"], tablefmt="grid"))
+
+# print(attraction_type)
