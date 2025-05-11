@@ -1,69 +1,92 @@
-from dotenv import load_dotenv
 import os
 import requests
 from datetime import datetime
 from bs4 import BeautifulSoup
+from tabulate import tabulate
+from dotenv import load_dotenv
 import time
-from tabulate import tabulate 
 
+class HashTable:
+    def __init__(self):
+        self.table = {}
+
+    def add(self, key, value):
+        self.table[key.lower()] = value
+
+    def get(self, key):
+        return self.table.get(key.lower())
+
+    def items(self):
+        return self.table.items()
+
+class InvalidCityError(Exception):
+    pass
 
 load_dotenv()
-WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")
+API_KEY = os.getenv("WEATHER_API_KEY")
 
-city = input("Destination city: ").lower()
-num_days = int(input("Number of days: "))
-num_places = int(input("Number of places to visit: "))
+while True:
+    try:
+        city = input("Destination city: ").lower()
+        days = int(input("Number of days: "))
+        num_places = int(input("Number of places to visit: "))
 
+        weather_url = f"http://api.weatherapi.com/v1/forecast.json?key={API_KEY}&q={city}&days={days}&aqi=no&alerts=no"
+        weather = requests.get(weather_url).json()
 
-print("\n🌦️ Weather Forecast:")
-weather_url = f"http://api.weatherapi.com/v1/forecast.json?key={WEATHER_API_KEY}&q={city}&days={num_days}&aqi=no&alerts=no"
-weather = requests.get(weather_url).json()
-
-weather_data = []
-for i in range(num_days):
-    day = weather['forecast']['forecastday'][i]['day']
-    date = datetime.strptime(weather['forecast']['forecastday'][i]['date'], "%Y-%m-%d")
-    weather_data.append([
-        date.strftime('%d.%m.%Y.'),
-        f"{day['maxtemp_c']}°C",
-        f"{day['mintemp_c']}°C",
-        f"{day['avgtemp_c']}°C",
-        day['condition']['text']
-    ])
+        if "error" in weather:
+            raise InvalidCityError
+        
+        break
+    except ValueError:
+        print("Input values are incorrect!")
+    except InvalidCityError:
+        print("Input city not found!")
 
 
-print(tabulate(weather_data, headers=["Date", "Max Temp", "Min Temp", "Avg Temp", "Condition"], tablefmt="grid"))
-print("\n")
+weather_table = []
+for i in range(days):
+    day = weather['forecast']['forecastday'][i]
+    date = datetime.strptime(day['date'], "%Y-%m-%d").strftime("%d.%m.%Y")
+    max_temp = f"{day['day']['maxtemp_c']}°C"
+    min_temp = f"{day['day']['mintemp_c']}°C"
+    avg_temp = f"{day['day']['avgtemp_c']}°C"
+    condition = day['day']['condition']['text'].capitalize()
+    weather_table.append([date, max_temp, min_temp, avg_temp, condition])
 
+print("\n🌦️ Weather Forecast:\n")
+print(tabulate(weather_table, headers=["Date", "Max Temp", "Min Temp", "Avg Temp", "Condition"], tablefmt="fancy_grid"))
 
-print("\n📌 Gathering sightseeing places...\n")
-n, k = 1, 0
-attractions_data = []
+print("\n📌 Gathering sightseeing places...")
+n = 1
+k = 0
+attractions = HashTable()
 
-while n <= num_places:
+while True:
     url = f"https://www.inyourpocket.com/{city}/Sightseeing?p={k}"
-    r = requests.get(url)
-    if r.status_code != 200:
+    page = requests.get(url)
+
+    if page.status_code != 200:
         break
 
-    lapa = BeautifulSoup(r.content, "html.parser")
-    places = lapa.find_all("h3", class_="bl")
-    addresses = lapa.find_all("span", class_="listing_address")
-    attraction_types = lapa.find_all("div", class_="category cuisine")
+    lapa = BeautifulSoup(page.content, "html.parser")
+    body = lapa.find("body")
+    names = body.find_all("h3", class_="bl")
+    addresses = body.find_all("span", class_="listing_address")
+    types = body.find_all("div", class_="category cuisine")
 
-    for name_tag, addr_tag, type_tag in zip(places, addresses, attraction_types):
+    for name_tag, addr_tag, type_tag in zip(names, addresses, types):
         if n > num_places:
             break
-
-        name = name_tag.get_text(strip=True)
+        name = name_tag.get_text(strip=True).title()
         address = addr_tag.get_text(strip=True)
-        attraction_type = type_tag.get_text(strip=True) if type_tag else "Unknown" 
-        
-        attractions_data.append([n, name, address, attraction_type])
+        attraction_type = type_tag.get_text(strip=True) if type_tag else "N/A"
+        attractions.add(name, (address, attraction_type))
         n += 1
+
     k += 1
     time.sleep(0.5)
 
-print(tabulate(attractions_data, headers=["#", "Attraction", "Address", "Attraction Type"], tablefmt="grid"))
-
-# print(attraction_type)
+print("\n🏙️ Sightseeing Plan:\n")
+table_data = [(i+1, name.title(), *value) for i, (name, value) in enumerate(attractions.items())]
+print(tabulate(table_data, headers=["#", "Name", "Address", "Type"], tablefmt="fancy_grid"))
