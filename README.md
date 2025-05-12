@@ -1,19 +1,7 @@
 # DATU_STR_nosleguma_projekts_2025
-
-Izstrādājot projektu Jums ir nepieciešams izveidot README.md datni, kur Jūs (OBLIGĀTI latviešu valodā):
-
-·       detalizēti aprakstīsiet projekta uzdevumu;
-
-·       izskaidrosiet kādas Python bibliotēkas un kāpēc tiek izmantotas projekta izstrādes laikā
-
-·       projekta izstrādes laikā jāizmanto savas definētas datu struktūras
-
-·       aprakstīsies programmatūras izmantošanas metodes
-
  Eiropas ceļošanas plāns. Projekta uzdevums ir izstrādāt programmu, kas ļaus apskatīt ievadītās Eiropas pilsētas laikapstākļus noteiktajās dienās, kā arī tiek izvadīti apskates objektu dati, balstoties uz norādīto daudzumu.
 
 # Projekta izmantošana:
-
 Ievades daļa
 
 - Ievada Eiropas pilsētu( nav obligāti jābūt galvaspilsētai, bet jārēķinās ar to, ka var neizvadīt daudz apskates objektus).
