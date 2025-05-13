@@ -61,7 +61,7 @@ for i in range(days):
     condition = day['day']['condition']['text'].capitalize()
     weather_table.append([date, max_temp, min_temp, avg_temp, condition])
 
-print("\n🌦️ Weather Forecast:\n")
+print("\nWeather Forecast:\n")
 print(tabulate(weather_table, headers=["Date", "Max Temp", "Min Temp", "Avg Temp", "Condition"], tablefmt="fancy_grid"))
 
 print("\n📌 Gathering sightseeing places...")
@@ -94,6 +94,6 @@ while True:
     k += 1
     time.sleep(0.5)
 
-print("\n🏙️ Sightseeing Plan:\n")
+print("\nPlaces to visit:\n")
 table_data = [(i+1, name.title(), *value) for i, (name, value) in enumerate(attractions.items())]
 print(tabulate(table_data, headers=["#", "Name", "Address", "Type"], tablefmt="fancy_grid"))
