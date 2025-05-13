@@ -22,6 +22,9 @@ class HashTable:
 class InvalidCityError(Exception):
     pass
 
+class DayCountError(Exception):
+    pass
+
 load_dotenv()
 API_KEY = os.getenv("WEATHER_API_KEY")
 
@@ -36,12 +39,16 @@ while True:
 
         if "error" in weather:
             raise InvalidCityError
+        if days > 14 and days < 1:
+            raise DayCountError
         
         break
     except ValueError:
         print("Input values are incorrect!")
     except InvalidCityError:
         print("Input city not found!")
+    except DayCountError:
+        print("Input between 1 and 14 days!")
 
 
 weather_table = []
