@@ -64,7 +64,7 @@ for i in range(days):
 print("\nWeather Forecast:\n")
 print(tabulate(weather_table, headers=["Date", "Max Temp", "Min Temp", "Avg Temp", "Condition"], tablefmt="fancy_grid"))
 
-print("\n📌 Gathering sightseeing places...")
+print("\n Gathering sightseeing places...")
 n = 1
 k = 0
 attractions = HashTable()
