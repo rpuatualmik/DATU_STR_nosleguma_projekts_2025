@@ -48,7 +48,7 @@ while True:
     except InvalidCityError:
         print("Input city not found!")
     except DayCountError:
-        print("Input between 1 and 14 days!")
+        print("Input between 1 and 3 days!") #API ierobežojums
 
 
 weather_table = []
